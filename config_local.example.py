@@ -17,3 +17,8 @@ SELF_NAME = ""
 SENDER_NAMES = {
     # "123456789@lid": "Ali Veli",
 }
+
+# Email. Test mode sends to EMAIL_TEST_TO only; set EMAIL_TEST_MODE = False to email EMAIL_TO.
+EMAIL_TEST_MODE = True
+EMAIL_TEST_TO = "you@example.com"
+EMAIL_TO = ""             # the team leader

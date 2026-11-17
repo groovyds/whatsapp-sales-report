@@ -155,6 +155,22 @@ The project went into a public GitHub repository. To keep it free of personal da
   The template produces exactly the file that was installed.
 - The compiled helper isn't committed; it's built from source.
 
+## 2026-11-17: checks and email
+
+Decided with the user: Mail.app sends the report automatically, but only after checks pass. A
+failed check is a hard block (no "send anyway"); the Retry / Not now dialog is the only way on.
+- **Blocking checks** (`checks.py`): the saved Excel file matches each rep's latest post and the
+  posts add up to the TOTAL row; the chat is for the report day and its newest message is from
+  18:00 or later (`FRESH_AFTER`), which catches a Mac app that hadn't synced the EOD posts.
+- **Not blocking:** unreadable lines stay warnings on the Issues sheet. The "above 100" limit is
+  parked, because with no override a genuine big day could never be sent.
+- **Counting rule confirmed:** one EOD post per rep, latest wins. Adding up per-sale posts was
+  rejected, since reps don't reliably post every sale.
+- **Re-sends** ask first (terminal y/n, or a dialog on the schedule); sends are logged in
+  `out/sent_log.csv`.
+- **Test mode** sends to the user only, subject marked `[TEST]`. Verified for real: a test email
+  from a manual run and a full scheduled run both sent, and a stale chat was blocked (exit 3).
+
 ## Where it stands
 
 See [Current state in the README](../README.md#current-state). In short: it works end to end every

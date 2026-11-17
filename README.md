@@ -4,7 +4,8 @@ Turns a sales team's WhatsApp group into a daily Excel report, automatically, on
 
 Reps post their numbers in a WhatsApp group (`2 up`, `1 ncst`, `1 online superbox` …). Every day at
 18:40, this project reads the group from the WhatsApp Mac app and works out each rep's numbers per
-product. It writes `out/sales_report_YYYY-MM-DD.xlsx`, ready to email to the team leader.
+product. It writes `out/sales_report_YYYY-MM-DD.xlsx`, checks it, and emails it to the team leader
+with Mail.app.
 
 > **Status (2026-11-17):** working end to end and running daily on one Mac. The automatic report
 > matches one built from a manual WhatsApp export exactly. See [Current state](#current-state) for
@@ -23,7 +24,10 @@ product. It writes `out/sales_report_YYYY-MM-DD.xlsx`, ready to email to the tea
   │      ├─ preprocess.py     split into messages, clean, keep today → processed/messages_YYYY-MM-DD.csv
   │      ├─ report.py         match products, total per rep, flag issues → out/sales_report_YYYY-MM-DD.xlsx
   │      └─ view.py           print the table (into out/daily.log)
-  └─ 4. delete .wa_snapshot/, show a notification
+  ├─ 4. send_report.py
+  │      ├─ checks.py         Excel matches the posts? chat synced up to 18:00+? Any failure: no email
+  │      └─ Mail.app          email with totals in the body and the .xlsx attached → out/sent_log.csv
+  └─ 5. delete .wa_snapshot/, show a notification
          If anything fails: open WhatsApp and show a Retry / Not now dialog (waits up to 4 hours)
 ```
 
@@ -65,7 +69,10 @@ launchctl kickstart gui/$(id -u)/com.salestracker.daily     # test run now; then
 
 | You want to… | Do this |
 |---|---|
-| Get today's report | Nothing: it's made at 18:40 and lands in `out/` |
+| Get today's report | Nothing: it's made, checked and emailed at 18:40, and lands in `out/` |
+| Check a report without sending | `uv run checks.py --date 2026-11-17` |
+| Send (or re-send) a report | `uv run send_report.py --date 2026-11-17` (asks before a re-send) |
+| Go live after testing | In `config_local.py`: set `EMAIL_TO`, then `EMAIL_TEST_MODE = False` |
 | See what a run did | Read the newest block at the bottom of `out/daily.log` |
 | Re-run today (e.g. after "Not now") | `./daily.sh` |
 | Make the report for another day | `./daily.sh 2026-11-17` |
@@ -85,8 +92,10 @@ launchctl kickstart gui/$(id -u)/com.salestracker.daily     # test run now; then
 | `preprocess.py` | Step 1: raw export → clean CSV for one day |
 | `report.py` | Step 2: CSV → Excel report (Summary + Issues sheets) |
 | `view.py` | Prints a report in the terminal |
+| `checks.py` | Pre-email checks: Excel matches the posts, chat is fresh |
+| `send_report.py` | Step 3: checks, then email via Mail.app; logs to `out/sent_log.csv` |
 | `config.py` | Products, spellings, folders (shared settings) |
-| `config_local.py` | Your group name, your name, rep ids (**not in git**; copy from `config_local.example.py`) |
+| `config_local.py` | Your group name, your name, rep ids, email addresses (**not in git**; copy from `config_local.example.py`) |
 | `tools/` | `wa-snapshot`, the WhatsApp data copier, and why it exists |
 | `launchd/` | Schedule template and installer |
 | `tests/` | Parser and counting tests (made-up data) |
@@ -97,8 +106,8 @@ launchctl kickstart gui/$(id -u)/com.salestracker.daily     # test run now; then
 This repository contains **no chat data**. `inbox/`, `processed/`, `out/`, `.wa_snapshot/` and
 `config_local.py` stay on your Mac (see `.gitignore`). The tests use invented names and messages.
 
-WhatsApp's data is read only by `tools/wa-snapshot`, read-only and on your Mac. Nothing is sent
-anywhere: the report is emailed by hand.
+WhatsApp's data is read only by `tools/wa-snapshot`, read-only and on your Mac. The only thing that
+leaves the Mac is the report email, sent by your own Mail.app to the addresses in `config_local.py`.
 
 ## Current state
 
@@ -108,7 +117,9 @@ anywhere: the report is emailed by hand.
 - A Retry / Not now dialog when WhatsApp hasn't synced, then a fresh attempt.
 - Real-data check (2026-11-16): the report built from the WhatsApp database was identical to one
   built from a manual phone export of the same day.
-- 37 tests passing.
+- Email via Mail.app after two blocking checks (Excel matches the posts; chat synced to 18:00+).
+  In test mode (to yourself) until the team leader's address is added.
+- 48 tests passing.
 
 **Known limitations**
 - **Reps still post each sale through the day.** The design expects one end-of-day message per
@@ -121,6 +132,7 @@ anywhere: the report is emailed by hand.
 - **Only text messages are read.** A number written only in a photo caption is skipped.
 
 **Not done yet / ideas**
-- Emailing the report to the team leader automatically (still done by hand).
+- Switching the email from test mode to the team leader (address not known yet).
+- A limit for unusual numbers (above 100), parked: see `next-steps.md`.
 - A rep roster (`ROSTER` in `config.py`) to list reps who didn't report.
 - Extra cleaning rules for messages, deferred until real EOD-format data comes in.

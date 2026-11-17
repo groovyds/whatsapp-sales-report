@@ -1,5 +1,6 @@
 #!/bin/zsh
-# Daily run: export today's group chat from the WhatsApp Mac app, then build the Excel report.
+# Daily run: export today's group chat from the WhatsApp Mac app, build the Excel report,
+# check it, and email it with Mail.app (send_report.py; test mode sends to you only).
 # Scheduled at 18:40 by launchd; set up with ./launchd/install.sh (log: out/daily.log).
 #
 # If a run fails (most often: the WhatsApp Mac app hasn't synced today's messages yet), it
@@ -72,6 +73,24 @@ run_once() {
         HINT="See out/daily.log for details. Click Retry after fixing it."
         return 1
     fi
+    # Checks, then email. A failed check blocks the email; there is no "send anyway".
+    out=$(uv run send_report.py --date "$DAY" 2>&1)
+    rc=$?
+    print -r -- "$out"
+    if (( rc == 3 )); then
+        REASON=$(print -r -- "$out" | grep '✗' | sed 's/^ *✗ /• /')
+        if [[ $out == *"may not have synced"* ]]; then
+            HINT="Open WhatsApp on this Mac, wait until the EOD posts show up in the group, then click Retry."
+            open -g -a WhatsApp 2>/dev/null
+        else
+            HINT="The email was not sent. See out/daily.log; Retry won't help until this is fixed."
+        fi
+        return 1
+    elif (( rc )); then
+        REASON=${out##*$'\n'}
+        HINT="The email was not sent. See out/daily.log for details, then click Retry."
+        return 1
+    fi
 }
 
 echo "===== $(date '+%Y-%m-%d %H:%M:%S')  (report day: $DAY)"
@@ -87,4 +106,4 @@ $HINT" || exit 1
     (( attempt++ ))
     echo "----- attempt $attempt, $(date +%H:%M:%S)"
 done
-notify "Report for $DAY is ready in out/"
+notify "Report for $DAY checked and emailed (see out/daily.log)"
