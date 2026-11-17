@@ -1,0 +1,17 @@
+# Personal data: never commit
+inbox/
+processed/
+out/
+.wa_snapshot/
+config_local.py
+
+# Built locally (rebuilding changes its fingerprint, so keep the one with Full Disk Access)
+tools/wa-snapshot
+
+# Python / tooling
+.venv/
+__pycache__/
+.pytest_cache/
+
+# macOS
+.DS_Store
