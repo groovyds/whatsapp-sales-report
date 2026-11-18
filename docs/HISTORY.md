@@ -160,8 +160,8 @@ The project went into a public GitHub repository. To keep it free of personal da
 Decided with the user: Mail.app sends the report automatically, but only after checks pass. A
 failed check is a hard block (no "send anyway"); the Retry / Not now dialog is the only way on.
 - **Blocking checks** (`checks.py`): the saved Excel file matches each rep's latest post and the
-  posts add up to the TOTAL row; the chat is for the report day and its newest message is from
-  18:00 or later (`FRESH_AFTER`), which catches a Mac app that hadn't synced the EOD posts.
+  posts add up to the TOTAL row; the chat is for the report day. (A "newest message after 18:00"
+  check was tried and removed on 2026-11-18: the group can go quiet before 18:00 on a normal day.)
 - **Not blocking:** unreadable lines stay warnings on the Issues sheet. The "above 100" limit is
   parked, because with no override a genuine big day could never be sent.
 - **Counting rule confirmed:** one EOD post per rep, latest wins. Adding up per-sale posts was

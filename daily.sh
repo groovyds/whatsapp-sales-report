@@ -79,12 +79,7 @@ run_once() {
     print -r -- "$out"
     if (( rc == 3 )); then
         REASON=$(print -r -- "$out" | grep '✗' | sed 's/^ *✗ /• /')
-        if [[ $out == *"may not have synced"* ]]; then
-            HINT="Open WhatsApp on this Mac, wait until the EOD posts show up in the group, then click Retry."
-            open -g -a WhatsApp 2>/dev/null
-        else
-            HINT="The email was not sent. See out/daily.log; Retry won't help until this is fixed."
-        fi
+        HINT="The email was not sent. See out/daily.log; Retry won't help until this is fixed."
         return 1
     elif (( rc )); then
         REASON=${out##*$'\n'}

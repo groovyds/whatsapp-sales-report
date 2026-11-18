@@ -18,7 +18,7 @@ emails go to your own address, marked `[TEST]`.
 If any check fails, don't send the email. Show what's wrong instead (hard block, Retry / Not now only).
 
 - [x] **Totals match:** each rep's total in the saved Excel file matches the numbers in their WhatsApp post
-- [x] **Export date:** the chat export is today's, not an old file, and the newest message is from 18:00 or later (`FRESH_AFTER`)
+- [x] **Export date:** the chat export is today's, not an old file
 
 ## Ideas for later
 - **Unusual numbers:** flag any product above 100 for one rep in one day (parked: unclear whether it

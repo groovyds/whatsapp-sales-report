@@ -17,7 +17,6 @@ DAY = date(2026, 11, 16)
 def folders(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "PROCESSED", str(tmp_path / "processed"))
     monkeypatch.setattr(config, "OUT", str(tmp_path / "out"))
-    monkeypatch.setattr(config, "FRESH_AFTER", "18:00")
     (tmp_path / "processed").mkdir()
     return tmp_path
 
@@ -75,10 +74,9 @@ def test_missing_rep_row_is_caught(folders):
     assert any("Ayşe: posted a report but has no row" in p for p in checks.check_totals(DAY))
 
 
-def test_stale_chat_blocks(folders):
+def test_quiet_evening_does_not_block(folders):
     write_day([("17:20:00", "Ali", "45 - mobil kontrat")])
-    problems = checks.check_fresh(DAY)
-    assert len(problems) == 1 and "17:20, before 18:00" in problems[0]
+    assert checks.check_fresh(DAY) == []
 
 
 def test_wrong_day_blocks(folders):

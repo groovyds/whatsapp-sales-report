@@ -25,7 +25,7 @@ with Mail.app.
   │      ├─ report.py         match products, total per rep, flag issues → out/sales_report_YYYY-MM-DD.xlsx
   │      └─ view.py           print the table (into out/daily.log)
   ├─ 4. send_report.py
-  │      ├─ checks.py         Excel matches the posts? chat synced up to 18:00+? Any failure: no email
+  │      ├─ checks.py         Excel matches the posts? chat is for the report day? Any failure: no email
   │      └─ Mail.app          email with totals in the body and the .xlsx attached → out/sent_log.csv
   └─ 5. delete .wa_snapshot/, show a notification
          If anything fails: open WhatsApp and show a Retry / Not now dialog (waits up to 4 hours)
@@ -117,7 +117,7 @@ leaves the Mac is the report email, sent by your own Mail.app to the addresses i
 - A Retry / Not now dialog when WhatsApp hasn't synced, then a fresh attempt.
 - Real-data check (2026-11-16): the report built from the WhatsApp database was identical to one
   built from a manual phone export of the same day.
-- Email via Mail.app after two blocking checks (Excel matches the posts; chat synced to 18:00+).
+- Email via Mail.app after two blocking checks (Excel matches the posts; chat is for the report day).
   In test mode (to yourself) until the team leader's address is added.
 - 48 tests passing.
 

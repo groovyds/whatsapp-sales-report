@@ -7,13 +7,12 @@ Usage:
 1. Totals match: every rep's row in the saved Excel file equals their latest WhatsApp post,
    and the TOTAL row equals the sum of the rows. Catches a file that was written or added up
    wrong. (A line the parser misread is not caught here; it's listed on the Issues sheet.)
-2. Chat is fresh: the cleaned messages are for the report day, and the newest one is from
-   FRESH_AFTER (config.py) or later. Catches a WhatsApp Mac app that hadn't synced yet.
+2. Chat is for the report day: the cleaned messages exist and are all dated that day.
 """
 import argparse
 import csv
 import sys
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 
 from openpyxl import load_workbook
@@ -83,7 +82,7 @@ def check_totals(day):
 
 
 def check_fresh(day):
-    """The chat must be for the report day and run up to at least FRESH_AFTER. Returns problems."""
+    """The chat must be for the report day. Returns problems."""
     csv_file = csv_path(day)
     if not csv_file.exists():
         return [f"{csv_file} is missing"]
@@ -94,11 +93,6 @@ def check_fresh(day):
         dates = {row["date"] for row in csv.DictReader(f)}
     if dates != {day.isoformat()}:
         return [f"Messages are dated {sorted(dates)}, not {day}"]
-    cutoff = datetime.strptime(config.FRESH_AFTER, "%H:%M").time()
-    newest = max(t for t, _, _ in messages)
-    if newest < cutoff:
-        return [f"Newest message is from {newest:%H:%M}, before {config.FRESH_AFTER}. "
-                "WhatsApp on this Mac may not have synced the EOD posts yet"]
     return []
 
 

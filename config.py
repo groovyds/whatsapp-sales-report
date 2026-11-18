@@ -62,10 +62,6 @@ EMAIL_TO = ""             # the team leader's address, set in config_local.py
 EMAIL_SUBJECT = "Daily sales report {date}"
 EMAIL_GREETING = "Hello,"
 
-# Chat freshness check: the newest message of the day must be from this time or later,
-# otherwise WhatsApp on the Mac probably hadn't synced the EOD posts and nothing is sent.
-FRESH_AFTER = "18:00"
-
 INBOX = "inbox"          # raw WhatsApp exports go here
 PROCESSED = "processed"  # step 1 output (cleaned CSV)
 OUT = "out"              # step 2 output (Excel report)
