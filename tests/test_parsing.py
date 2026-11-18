@@ -121,6 +121,37 @@ def test_unknown_dash_line_flagged_even_without_known_product():
     assert counts == {} and len(problems) == 1
 
 
+def test_product_first_report_is_flagged_not_dropped():
+    counts, problems = report.parse_report("mobil kontrat: 45\nncst 3")
+    assert counts == {}
+    assert len(problems) == 2 and "'45 - mobil kontrat'" in problems[0]
+
+
+def test_product_first_line_flagged_next_to_counted_lines():
+    counts, problems = report.parse_report("2 - ncst\nup 4")
+    assert counts == {"NCST": 2}
+    assert len(problems) == 1 and "Number after the product" in problems[0]
+
+
+def test_chatter_ending_in_a_number_is_still_ignored():
+    assert report.parse_report("saat 5") == ({}, [])
+
+
+# ---- names written by fetch_chat.py ----------------------------------------
+
+@pytest.mark.parametrize("name", [
+    "Ali: Kadıköy",
+    "~ Mehmet | Turkcell Bayi Kadıköy Merkez Mağaza Satış Danışmanı 2026",
+])
+def test_awkward_sender_names_keep_their_own_message(name):
+    import fetch_chat
+    raw = (f"[2026-11-18, 17:00:00] Ayşe: 3 - up\n"
+           f"[2026-11-18, 17:05:00] {fetch_chat.safe_name(name)}: 2 - ncst")
+    msgs = preprocess.read_messages(raw)
+    assert len(msgs) == 2
+    assert msgs[1]["lines"] == ["2 - ncst"] and msgs[1]["sender"][:5] == name.replace(":", "")[:5]
+
+
 # ---- whole day -------------------------------------------------------------
 
 def test_latest_report_replaces_earlier():

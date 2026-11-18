@@ -84,6 +84,13 @@ def sender_name(con, jid, cache):
     return name
 
 
+def safe_name(name):
+    """A sender name the export line format can carry: preprocess.py ends the name at the
+    first ':' and accepts at most 60 characters, so a longer name or one with ':' would merge
+    the message into the previous one or cut it off, and that rep would silently be missing."""
+    return " ".join(name.replace(":", " ").split())[:60].strip() or "Unknown"
+
+
 def fetch(con, chat, day):
     """Return (lines, unknown) for one calendar day in local time."""
     start = datetime.combine(day, time()).timestamp() - APPLE_EPOCH
@@ -106,7 +113,7 @@ def fetch(con, chat, day):
                 unknown.setdefault(jid, text.splitlines()[0][:40])
         when = datetime.fromtimestamp(stamp + APPLE_EPOCH)
         # Year-first date: unambiguous, so DATE_ORDER does not matter for these files.
-        lines.append(f"[{when:%Y-%m-%d, %H:%M:%S}] {name}: {text}")
+        lines.append(f"[{when:%Y-%m-%d, %H:%M:%S}] {safe_name(name)}: {text}")
     return lines, unknown
 
 

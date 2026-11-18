@@ -27,6 +27,8 @@ import config
 
 # "45 - mobil kontrat", "45 mobil kontrat", "+2 upcell"  (separator can be - – — : =)
 SEGMENT = re.compile(r"^\+?(?P<n>\d+)\s*(?P<sep>[-–—:=])?\s*(?P<name>[^\d\s].*)$")
+# The same written the wrong way round: "mobil kontrat: 45", "up 2". Not counted, always flagged.
+REVERSED = re.compile(r"^(?P<name>[^\d\s].*?)\s*[-–—:=]?\s*\+?(?P<n>\d+)$")
 FOLD = str.maketrans("ıüöşçğâîû", "iuoscgaiu")
 
 
@@ -54,7 +56,14 @@ def parse_report(text):
             continue
         match = SEGMENT.match(chunk)
         if not match:
-            maybe.append(f"Line not understood: '{chunk}'")
+            reversed_ = REVERSED.match(chunk)
+            if reversed_ and product_key(reversed_["name"]) in ALIASES:
+                # flagged even if nothing else in the message counts, so a whole report
+                # written product-first can't vanish without a note on the Issues sheet
+                problems.append(f"Number after the product, not counted: '{chunk}' "
+                                f"(write it as '{reversed_['n']} - {reversed_['name']}')")
+            else:
+                maybe.append(f"Line not understood: '{chunk}'")
             continue
         key = product_key(match["name"])
         if key in IGNORED:
