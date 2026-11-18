@@ -70,7 +70,7 @@ def recipient():
 def body_text(day):
     latest, _ = report.build_report(list(report.load_messages(checks.csv_path(day))))
     lines = [f"{config.EMAIL_GREETING}", "",
-             f"Daily sales report for {day:%d.%m.%Y} ({len(latest)} reps reported).", "",
+             f"Daily sales report for {day:%A %d.%m.%Y} ({len(latest)} reps reported).", "",
              "Totals:"]
     for p in report.PRODUCT_NAMES:
         lines.append(f"  {p}: {sum(c.get(p, 0) for _, c in latest.values())}")

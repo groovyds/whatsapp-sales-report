@@ -92,7 +92,7 @@ def test_missing_files_block(folders):
 def test_body_has_totals(folders):
     write_day(GOOD)
     body = send_report.body_text(DAY)
-    assert "(2 reps reported)" in body
+    assert "Daily sales report for Monday 16.11.2026 (2 reps reported)." in body
     assert "Mobil kontrat: 45" in body and "NCST: 3" in body and "SOL: 1" in body
 
 
