@@ -20,6 +20,16 @@ If any check fails, don't send the email. Show what's wrong instead (hard block,
 - [x] **Totals match:** each rep's total in the saved Excel file matches the numbers in their WhatsApp post
 - [x] **Export date:** the chat export is today's, not an old file
 
+## Privacy: delete the WhatsApp copy sooner (noted 19 Nov 2026, not started)
+`tools/wa-snapshot` copies WhatsApp's **whole** databases (all chats, not just the sales group) into
+`.wa_snapshot/`. `daily.sh` only deletes them when the script exits (`trap … EXIT`), so while the
+Retry / Not now dialog or the "send again?" dialog is open (up to 4 hours each), all chats sit there.
+- [ ] Delete `.wa_snapshot/` in `daily.sh` right after `fetch_chat.py` has written
+  `inbox/chat_YYYY-MM-DD.txt` (nothing after that step reads it; each Retry makes a fresh copy anyway)
+- [ ] Also delete any leftover `.wa_snapshot/` at the start of a run (covers a force quit or power loss,
+  when the exit trap never runs)
+- [ ] Shorten the 4-hour dialog wait (`WAIT_SECONDS` in `daily.sh`, `DIALOG_WAIT` in `send_report.py`)
+
 ## Ideas for later
 - **Unusual numbers:** flag any product above 100 for one rep in one day (parked: unclear whether it
   should block, since a real day above 100 could then never be sent)
